@@ -7,34 +7,34 @@
 
 class Vec3 {
 private:
-	std::array<double, 3> m_e{ 0, 0, 0 };
+	std::array<double, 3> e{ 0, 0, 0 };
 
 public:
 
-	Vec3() : m_e{ 0,0,0 } {};
+	Vec3() : e{ 0,0,0 } {};
 
-	Vec3(double e0, double e1, double e2) : m_e{ e0, e1, e2 } {};
+	Vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {};
 
-	auto x() const ->  double { return m_e[0]; };
-	auto y() const ->  double { return m_e[1]; };
-	auto z() const ->  double { return m_e[2]; };
+	auto x() const ->  double { return e[0]; };
+	auto y() const ->  double { return e[1]; };
+	auto z() const ->  double { return e[2]; };
 
-	auto operator-() const -> Vec3 { return { -m_e[0], -m_e[1], -m_e[2] }; };
+	auto operator-() const -> Vec3 { return { -e[0], -e[1], -e[2] }; };
 
-	auto operator[](int i) const -> double { return m_e.at(i); };
-	auto operator[](int i) -> double& { return m_e.at(i); };
+	auto operator[](int i) const -> double { return e.at(i); };
+	auto operator[](int i) -> double& { return e.at(i); };
 
 	auto operator+= (const Vec3& v) -> Vec3& {
-		m_e[0] += v.m_e[0];
-		m_e[1] += v.m_e[1];
-		m_e[2] += v.m_e[2];
+		e[0] += v.e[0];
+		e[1] += v.e[1];
+		e[2] += v.e[2];
 		return *this;
 	}
 
 	auto operator*= (double s) -> Vec3& {
-		m_e[0] *= s;
-		m_e[1] *= s;
-		m_e[2] *= s;
+		e[0] *= s;
+		e[1] *= s;
+		e[2] *= s;
 		return *this;
 	}
 
@@ -44,7 +44,7 @@ public:
 	}
 
 	auto length_squared() const -> double {
-		return m_e[0] * m_e[0] + m_e[1] * m_e[1] + m_e[2] * m_e[2];
+		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
 
 	auto length() const -> double {
