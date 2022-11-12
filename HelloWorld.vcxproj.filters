@@ -31,5 +31,8 @@
     <ClInclude Include="color.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ray.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
