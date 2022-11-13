@@ -4,9 +4,21 @@
 
 #include <iostream>
 
+auto do_fit_sphere(const Point3& sphere_center, double sphere_radius, const Ray& ray) -> bool {
+	Vec3 center_to_origin = ray.m_origin - sphere_center;
+	auto a = dot(ray.m_direction, ray.m_direction);
+	auto b = 2.0 * dot(center_to_origin, ray.m_direction);
+	auto c = dot(center_to_origin, center_to_origin) - sphere_radius * sphere_radius;
+	auto discriminant = b * b - 4 * a * c;
+	return (discriminant > 0);
+}
+
 auto get_ray_color(const Ray& ray)-> Color {
 	// 原文では unit vectorを取ってるけどそれはイミフ
 	// y が [-1, 1] なのを t [0, 1]に変換
+	if (do_fit_sphere({ 0, 0, -1 }, 0.5, ray)) {
+		return { 0.1, 0.5, 0.1 };
+	}
 	double t = 0.5 * (ray.m_direction.y() + 1.0);
 	return (1.0 - t) * Color { 1.0, 1.0, 1.0 } + t * Color(0.5, 0.7, 1.0);
 }
