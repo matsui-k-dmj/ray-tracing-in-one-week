@@ -34,5 +34,17 @@
     <ClInclude Include="ray.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="hittable.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="hittable_list.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

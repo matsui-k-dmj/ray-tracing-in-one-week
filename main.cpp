@@ -1,7 +1,14 @@
-﻿#include "color.h"
+﻿#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
+
+#include "color.h"
 #include "ray.h"
 #include "vec3.h"
 
+#include "utils.h"
+
+#include <memory>
 #include <iostream>
 
 auto do_hit_sphere(const Point3& sphere_center, double sphere_radius, const Ray& ray)-> bool {
@@ -28,22 +35,21 @@ auto hit_sphere(const Point3& sphere_center, double sphere_radius, const Ray& ra
 	}
 }
 
-auto get_ray_color(const Ray& ray)-> Color {
+auto get_ray_color(const Ray& ray, const Hittable& world)-> Color {
 
 
-	Point3 sphere_center{ 0, 0, -1 };
+	HitRecord hit_record{};
+	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
 
-	//if (do_hit_sphere(sphere_center, 0.5, ray)) {
-	//	return { 0.1, 0.5, 0.1 };
-	//}
 
-	auto t = hit_sphere(sphere_center, 0.5, ray);
-	if (t >= 0) {
+	if (do_hit) {
 		// sphere の法線ベクトルの可視化
-		auto normal_unit_vec = (ray.at(t) - sphere_center).unit();
+		auto normal_unit_vec = hit_record.normal;
 		return 0.5 * Color{
 			normal_unit_vec.x() + 1.0, normal_unit_vec.y() + 1.0, normal_unit_vec.z() + 1.0, };
 	}
+
+	// 背景
 	// 原文では unit vectorを取ってるけどそれはイミフ
 	// y が [-1, 1] なのを t [0, 1]に変換
 	double a = 0.5 * (ray.m_direction.y() + 1.0);
@@ -51,6 +57,7 @@ auto get_ray_color(const Ray& ray)-> Color {
 }
 
 int main() {
+
 	constexpr double width_over_height_ratio{ 16.0 / 9.0 };
 	constexpr int image_width{ 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
@@ -65,6 +72,12 @@ int main() {
 	const Point3 camera_origin{ 0, 0, 0 };
 	const Point3 viewport_lower_left_corner{
 		camera_origin - Vec3{0, 0, focal_length} - viewport_horizontal_vec / 2 - viewport_vertical_vec / 2 };
+
+	HittableList world{};
+	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1 }, 0.5));
+	world.add(std::make_shared<Sphere>(Point3{ 0, 0.2, -1 }, 0.5));
+
+	world.add(std::make_shared<Sphere>(Point3{ 0, -100.5, -1 }, 100.0)); // 地面
 
 
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -81,7 +94,7 @@ int main() {
 				+ h * viewport_vertical_vec
 				- camera_origin).unit() };
 
-			write_color(std::cout, get_ray_color(ray));
+			write_color(std::cout, get_ray_color(ray, world));
 		}
 	}
 
