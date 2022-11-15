@@ -46,5 +46,8 @@
     <ClInclude Include="utils.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
