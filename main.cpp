@@ -12,43 +12,27 @@
 #include <memory>
 #include <iostream>
 
-auto do_hit_sphere(const Point3& sphere_center, double sphere_radius, const Ray& ray)-> bool {
-	Vec3 center_to_origin = ray.m_origin - sphere_center;
-	auto a = dot(ray.m_direction, ray.m_direction);
-	auto b = 2.0 * dot(center_to_origin, ray.m_direction);
-	auto c = dot(center_to_origin, center_to_origin) - sphere_radius * sphere_radius;
-	auto discriminant = b * b - 4 * a * c;
-	return (discriminant > 0);
+auto visualize_normal_vec(const Vec3& normal_vec) -> Color {
+	auto normal_unit_vec = normal_vec.unit();
+	return 0.5 * Color{
+				normal_unit_vec.x() + 1.0, normal_unit_vec.y() + 1.0, normal_unit_vec.z() + 1.0, };
 }
 
-auto hit_sphere(const Point3& sphere_center, double sphere_radius, const Ray& ray)-> double {
-	Vec3 center_to_origin = ray.m_origin - sphere_center;
-	auto a = dot(ray.m_direction, ray.m_direction);
-	auto b = 2.0 * dot(center_to_origin, ray.m_direction);
-	auto c = dot(center_to_origin, center_to_origin) - sphere_radius * sphere_radius;
-	auto discriminant = b * b - 4 * a * c;
-	if (discriminant < 0) {
-		return -1.0;
-	}
-	else {
-		// smaller t
-		return (-b - sqrt(discriminant)) / (2.0 * a);
-	}
-}
-
-auto get_ray_color(const Ray& ray, const Hittable& world)-> Color {
-
+auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_available)-> Color {
+	if (n_reflection_available <= 0)
+		return{ 0, 0, 0 };
 
 	HitRecord hit_record{};
-	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
-
-
+	constexpr auto t_very_close = 0.001;
+	auto do_hit = world.hit(ray, t_very_close, constants::infinity, hit_record);
 	if (do_hit) {
-		// sphere の法線ベクトルの可視化
-		auto normal_unit_vec = hit_record.normal;
-		return 0.5 * Color{
-			normal_unit_vec.x() + 1.0, normal_unit_vec.y() + 1.0, normal_unit_vec.z() + 1.0, };
+		auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
+
+		auto reflect_ratio = 0.5;
+		return reflect_ratio * get_ray_color(Ray{ hit_record.point, reflectDirection }, world, n_reflection_available - 1);
 	}
+
+	// TODO: hit_record の tで分岐して 0 とか返してみる
 
 	// 背景
 	// 原文では unit vectorを取ってるけどそれはイミフ
@@ -63,11 +47,11 @@ int main() {
 	constexpr int image_width{ 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = 30;
+	constexpr int n_samples_per_pixel = 1000;
+	constexpr int max_refletion = 30;
 
 	HittableList world{};
 	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1 }, 0.5));
-	world.add(std::make_shared<Sphere>(Point3{ 0, 0.2, -1 }, 0.5));
 	world.add(std::make_shared<Sphere>(Point3{ 0, -100.5, -1 }, 100.0)); // 地面
 
 	Camera camera{};
@@ -82,7 +66,7 @@ int main() {
 				auto w{ (static_cast<double>(i) + random_1()) / (static_cast<double>(image_width) - 1) };
 				auto h{ (static_cast<double>(j) + random_1()) / (static_cast<double>(image_height) - 1) };
 				auto ray = camera.get_ray(w, h);
-				color += get_ray_color(ray, world);
+				color += get_ray_color(ray, world, max_refletion);
 			}
 
 			write_color(std::cout, color / n_samples_per_pixel);

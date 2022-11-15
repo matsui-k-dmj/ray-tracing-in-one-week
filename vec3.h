@@ -1,4 +1,5 @@
 #pragma once
+#include "utils.h"
 
 #include<cmath>
 #include<iostream>
@@ -104,3 +105,17 @@ inline auto Vec3::unit() const->Vec3 {
 using Point3 = Vec3;
 
 using Color = Vec3;
+
+inline auto random_vec_from_range(double min, double max) -> Vec3 {
+	return { random_from_range(min, max), random_from_range(min, max), random_from_range(min, max) };
+}
+
+inline auto random_vec_in_unit_sphere() -> Vec3 {
+	while (true) {
+		auto vec = random_vec_from_range(-1.0, 1.0);
+		if (vec.length_squared() < 1.0) {
+			return vec;
+		}
+		return vec;
+	}
+}
