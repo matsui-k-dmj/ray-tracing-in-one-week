@@ -28,7 +28,7 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 	if (do_hit) {
 		auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
 
-		auto reflect_ratio = 0.5;
+		auto reflect_ratio = 0.3;
 		return reflect_ratio * get_ray_color(Ray{ hit_record.point, reflectDirection }, world, n_reflection_available - 1);
 	}
 
@@ -47,7 +47,7 @@ int main() {
 	constexpr int image_width{ 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = 1000;
+	constexpr int n_samples_per_pixel = 100;
 	constexpr int max_refletion = 30;
 
 	HittableList world{};
