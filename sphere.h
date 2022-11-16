@@ -13,12 +13,12 @@ public:
 		: m_center{ center }, m_radius{ radius }
 	{};
 
-	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& record) const
+	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& out_record) const
 		-> bool override;
 
 };
 
-inline auto Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& record) const
+inline auto Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& out_record) const
 -> bool
 {
 	Vec3 center_to_origin = ray.m_origin - m_center;
@@ -35,10 +35,10 @@ inline auto Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& r
 		return false;
 	}
 
-	record.t = smaller_t;
-	record.point = ray.at(record.t);
-	Vec3 outword_nomal = (record.point - m_center) / m_radius;
-	set_face_normal(ray, outword_nomal, record);
+	out_record.t = smaller_t;
+	out_record.point = ray.at(out_record.t);
+	Vec3 outword_nomal = (out_record.point - m_center) / m_radius;
+	set_face_normal(ray, outword_nomal, out_record);
 
 	return true;
 }

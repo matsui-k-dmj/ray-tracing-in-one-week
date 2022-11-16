@@ -21,11 +21,11 @@ public:
 		m_object_list.push_back(object);
 	}
 
-	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& record) const
+	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& out_record) const
 		-> bool override;
 };
 
-inline auto HittableList::hit(const Ray& ray, double t_min, double t_max, HitRecord& record) const
+inline auto HittableList::hit(const Ray& ray, double t_min, double t_max, HitRecord& out_record) const
 -> bool
 {
 	HitRecord temp_hit_record{};
@@ -36,7 +36,7 @@ inline auto HittableList::hit(const Ray& ray, double t_min, double t_max, HitRec
 		if (object->hit(ray, t_min, t_closest, temp_hit_record)) {
 			do_hit_anything = true;
 			t_closest = temp_hit_record.t;
-			record = temp_hit_record;
+			out_record = temp_hit_record;
 		}
 	}
 	return do_hit_anything;

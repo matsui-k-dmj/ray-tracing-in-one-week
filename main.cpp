@@ -49,8 +49,8 @@ int main() {
 	constexpr int image_width{ 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = 100;
-	constexpr int max_refletion = 30;
+	constexpr int n_samples_per_pixel = 30;
+	constexpr int max_refletion = 3;
 
 	HittableList world{};
 	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1 }, 0.5));

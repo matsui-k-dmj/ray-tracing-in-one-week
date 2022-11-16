@@ -19,6 +19,6 @@ inline auto set_face_normal(const Ray& ray, const Vec3& outword_normal, HitRecor
 
 class Hittable {
 public:
-	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& record) const
+	virtual auto hit(const Ray& ray, double t_min, double t_max, HitRecord& out_record) const
 		-> bool = 0;
 };
