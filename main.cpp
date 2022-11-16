@@ -28,45 +28,43 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 		return{ 0, 0, 0 };
 
 	HitRecord hit_record{};
-	constexpr auto t_very_close = 0.001;
+	constexpr auto t_very_close = 1e-8;
+
 	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
 	if (do_hit) {
 		if (hit_record.t > t_very_close) {
+
 			Color attenuation_color{};
 			Ray ray_scattered{};
 			auto is_scattered = hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, ray_scattered);
-			if (instanceof<Metal>(hit_record.material_ptr.get())) {
-				std::cerr << "Metal " << "n_reflection_available: " << n_reflection_available << '\n';
-				std::cerr << "is_scattered: " << is_scattered << '\n';
-			}
 
 			if (is_scattered) {
 
 				return attenuation_color * get_ray_color(ray_scattered, world, n_reflection_available - 1);
 			}
-		}
-		else {
+		} {
 			return { 0, 0, 0 };
+
 		}
 	}
 
 	// 背景
 	// y が [-1, 1] なのを t [0, 1]に変換
-	double a = 0.5 * (ray.m_direction.y() + 1.0);
+	double a = 0.5 * (ray.m_direction.unit().y() + 1.0);
 	return (1.0 - a) * Color { 1.0, 1.0, 1.0 } + a * Color(0.5, 0.7, 1.0);
 }
 
 int main() {
 
 	constexpr double width_over_height_ratio{ 16.0 / 9.0 };
-	constexpr int image_width{ 100 };
+	constexpr int image_width{ 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = 1;
-	constexpr int max_refletion = 2;
+	constexpr int n_samples_per_pixel = 100;
+	constexpr int max_refletion = 10;
 
-	auto ground_material = std::make_shared<Lambertian>(Color{ 0.0, 0.05, 0.05 });
-	auto matt_material = std::make_shared<Lambertian>(Color{ 0.5, 0.5, 0.5 });
+	auto ground_material = std::make_shared<Lambertian>(Color{ 0, 0.1, 0.1 });
+	auto matt_material = std::make_shared<Lambertian>(Color{ 0.9, 0.9, 0.9 });
 	auto metal_material = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 });
 
 	HittableList world{};

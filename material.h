@@ -17,7 +17,7 @@ public:
 	Lambertian(const Color& attenuation) : m_attenuation{ attenuation } {};
 
 	virtual auto scatter(const Ray& /*ray_in*/, const HitRecord& hit_record, Color& out_attenuation, Ray& out_ray_scattered) const
-		-> bool {
+		-> bool override {
 		auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
 		out_ray_scattered = Ray{ hit_record.point, reflectDirection };
 		out_attenuation = m_attenuation;
@@ -32,10 +32,10 @@ public:
 	Metal(const Color& attenuation) : m_attenuation{ attenuation } {};
 
 	virtual auto scatter(const Ray& ray_in, const HitRecord& hit_record, Color& out_attenuation, Ray& out_ray_scattered) const
-		-> bool {
+		-> bool override {
 		auto reflectDirection = reflect(ray_in.m_direction.unit(), hit_record.normal);
 		out_ray_scattered = Ray{ hit_record.point, reflectDirection };
 		out_attenuation = m_attenuation;
-		return dot(reflectDirection.unit(), ray_in.m_direction.unit()) > 0;
+		return dot(reflectDirection.unit(), hit_record.normal.unit()) > 0;
 	}
 };
