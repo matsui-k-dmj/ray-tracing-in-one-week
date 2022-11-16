@@ -1,7 +1,7 @@
 ﻿#include "hittable.h"
 #include "hittable_list.h"
 #include "sphere.h"
-
+#include "material.h"
 #include "color.h"
 #include "ray.h"
 #include "vec3.h"
@@ -27,10 +27,12 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
 	if (do_hit) {
 		if (hit_record.t > t_very_close) {
-			auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
-
-			auto reflect_ratio = 0.3;
-			return reflect_ratio * get_ray_color(Ray{ hit_record.point, reflectDirection }, world, n_reflection_available - 1);
+			Color attenuation_color{};
+			Ray ray_scattered{};
+			auto is_scattered = hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, ray_scattered);
+			if (is_scattered) {
+				return attenuation_color * get_ray_color(ray_scattered, world, n_reflection_available - 1);
+			}
 		}
 		else {
 			return { 0, 0, 0 };
@@ -50,11 +52,14 @@ int main() {
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
 	constexpr int n_samples_per_pixel = 30;
-	constexpr int max_refletion = 3;
+	constexpr int max_refletion = 30;
+
+	auto ground_material = std::make_shared<Lambertian>(Color{ 0.0, 0.05, 0.05 });
+	auto matt_material = std::make_shared<Lambertian>(Color{ 0.5, 0.5, 0.5 });
 
 	HittableList world{};
-	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1 }, 0.5));
-	world.add(std::make_shared<Sphere>(Point3{ 0, -100.5, -1 }, 100.0)); // 地面
+	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1 }, 0.5, matt_material));
+	world.add(std::make_shared<Sphere>(Point3{ 0, -100.5, -1 }, 100.0, ground_material)); // 地面
 
 	Camera camera{};
 

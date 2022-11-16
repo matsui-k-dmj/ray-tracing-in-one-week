@@ -2,11 +2,16 @@
 
 #include "ray.h"
 
+#include <memory>
+
+class Material;
+
 struct HitRecord {
 	Point3 point{};
 	Vec3 normal{};
 	double t{};
 	bool is_front_face{};
+	std::shared_ptr<Material> material_ptr{};
 };
 
 inline auto set_face_normal(const Ray& ray, const Vec3& outword_normal, HitRecord& record) {
