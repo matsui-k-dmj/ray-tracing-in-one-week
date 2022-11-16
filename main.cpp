@@ -24,18 +24,20 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 
 	HitRecord hit_record{};
 	constexpr auto t_very_close = 0.001;
-	auto do_hit = world.hit(ray, t_very_close, constants::infinity, hit_record);
+	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
 	if (do_hit) {
-		auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
+		if (hit_record.t > t_very_close) {
+			auto reflectDirection = random_vec_in_unit_sphere().unit() + hit_record.normal;
 
-		auto reflect_ratio = 0.3;
-		return reflect_ratio * get_ray_color(Ray{ hit_record.point, reflectDirection }, world, n_reflection_available - 1);
+			auto reflect_ratio = 0.3;
+			return reflect_ratio * get_ray_color(Ray{ hit_record.point, reflectDirection }, world, n_reflection_available - 1);
+		}
+		else {
+			return { 0, 0, 0 };
+		}
 	}
 
-	// TODO: hit_record の tで分岐して 0 とか返してみる
-
 	// 背景
-	// 原文では unit vectorを取ってるけどそれはイミフ
 	// y が [-1, 1] なのを t [0, 1]に変換
 	double a = 0.5 * (ray.m_direction.y() + 1.0);
 	return (1.0 - a) * Color { 1.0, 1.0, 1.0 } + a * Color(0.5, 0.7, 1.0);
