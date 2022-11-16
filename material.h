@@ -24,3 +24,18 @@ public:
 		return true;
 	}
 };
+
+class Metal : public Material {
+public:
+	Color m_attenuation{};
+
+	Metal(const Color& attenuation) : m_attenuation{ attenuation } {};
+
+	virtual auto scatter(const Ray& ray_in, const HitRecord& hit_record, Color& out_attenuation, Ray& out_ray_scattered) const
+		-> bool {
+		auto reflectDirection = reflect(ray_in.m_direction.unit(), hit_record.normal);
+		out_ray_scattered = Ray{ hit_record.point, reflectDirection };
+		out_attenuation = m_attenuation;
+		return dot(reflectDirection.unit(), ray_in.m_direction.unit()) > 0;
+	}
+};

@@ -119,3 +119,8 @@ inline auto random_vec_in_unit_sphere() -> Vec3 {
 		return vec;
 	}
 }
+
+// 9.4 Mirrored Light Reflection
+inline auto reflect(const Vec3& in_vec, const Vec3& normal_vec) -> Vec3 {
+	return in_vec - 2 * dot(in_vec, normal_vec) * normal_vec;
+}
