@@ -39,10 +39,13 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 			auto is_scattered = hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, ray_scattered);
 
 			if (is_scattered) {
-
 				return attenuation_color * get_ray_color(ray_scattered, world, n_reflection_available - 1);
 			}
-		} {
+			else {
+				return { 0, 0, 0 };
+			}
+		}
+		else {
 			return { 0, 0, 0 };
 
 		}
@@ -65,13 +68,14 @@ int main() {
 
 	auto ground_material = std::make_shared<Lambertian>(Color{ 0, 0.1, 0.1 });
 	auto matt_material = std::make_shared<Lambertian>(Color{ 0.98, 0.51, 0.48 });
-	auto metal_material = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 });
+	auto metal_material = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 }, 0.5);
 	auto metal_perfect_material = std::make_shared<Metal>(Color{ 1.0, 1.0, 1.0 });
 
 
 	HittableList world{};
 	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1.5 }, 0.5, matt_material));
 	world.add(std::make_shared<Sphere>(Point3{ 1, 0, -1.0 }, 0.5, metal_material));
+
 	world.add(std::make_shared<Sphere>(Point3{ -0.7, 0, -0.5 }, 0.5, metal_perfect_material));
 
 	world.add(std::make_shared<Sphere>(Point3{ 0, -100.5, -1 }, 100.0, ground_material)); // 地面
