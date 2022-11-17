@@ -28,27 +28,22 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 		return{ 0, 0, 0 };
 
 	HitRecord hit_record{};
-	constexpr auto t_very_close = 1e-8;
+	constexpr auto t_very_close = 1e-10;
 
-	auto do_hit = world.hit(ray, 0.0, constants::infinity, hit_record);
+	auto do_hit = world.hit(ray, t_very_close, constants::infinity, hit_record);
 	if (do_hit) {
-		if (hit_record.t > t_very_close) {
 
-			Color attenuation_color{};
-			Ray ray_scattered{};
-			auto is_scattered = hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, ray_scattered);
+		Color attenuation_color{};
+		Ray ray_scattered{};
+		auto is_scattered = hit_record.material_ptr->scatter(ray, hit_record, attenuation_color, ray_scattered);
 
-			if (is_scattered) {
-				return attenuation_color * get_ray_color(ray_scattered, world, n_reflection_available - 1);
-			}
-			else {
-				return { 0, 0, 0 };
-			}
+		if (is_scattered) {
+			return attenuation_color * get_ray_color(ray_scattered, world, n_reflection_available - 1);
 		}
 		else {
 			return { 0, 0, 0 };
-
 		}
+
 	}
 
 	// 背景
@@ -58,23 +53,28 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 }
 
 int main() {
+	constexpr bool DEBUG = false;
 
 	constexpr double width_over_height_ratio{ 16.0 / 9.0 };
-	constexpr int image_width{ 400 };
+	constexpr int image_width{ DEBUG ? 100 : 400 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = 100;
-	constexpr int max_refletion = 10;
+	constexpr int n_samples_per_pixel = DEBUG ? 2 : 300;
+	constexpr int max_refletion = DEBUG ? 3 : 100;
 
-	auto ground_material = std::make_shared<Lambertian>(Color{ 0, 0.1, 0.1 });
+	auto ground_material = std::make_shared<Lambertian>(Color{ 0.3, 0.3, 0.3 });
 	auto matt_material = std::make_shared<Lambertian>(Color{ 0.98, 0.51, 0.48 });
 	auto metal_material = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 }, 0.5);
 	auto metal_perfect_material = std::make_shared<Metal>(Color{ 1.0, 1.0, 1.0 });
-
+	auto glass_material = std::make_shared<Glass>(1.5);
 
 	HittableList world{};
 	world.add(std::make_shared<Sphere>(Point3{ 0, 0, -1.5 }, 0.5, matt_material));
-	world.add(std::make_shared<Sphere>(Point3{ 1, 0, -1.0 }, 0.5, metal_material));
+	world.add(std::make_shared<Sphere>(Point3{ 2, 0, -1.5 }, 0.5, metal_material));
+
+	world.add(std::make_shared<Sphere>(Point3{ 0.4, 0, -0.3 }, 0.5, glass_material));
+	world.add(std::make_shared<Sphere>(Point3{ 0.4, 0, -0.3 }, -0.45, glass_material));
+	world.add(std::make_shared<Sphere>(Point3{ 2, 0, -0.3 }, 0.5, glass_material));
 
 	world.add(std::make_shared<Sphere>(Point3{ -0.7, 0, -0.5 }, 0.5, metal_perfect_material));
 

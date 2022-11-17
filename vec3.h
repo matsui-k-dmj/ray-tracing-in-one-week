@@ -124,3 +124,14 @@ inline auto random_vec_in_unit_sphere() -> Vec3 {
 inline auto reflect(const Vec3& in_vec, const Vec3& normal_vec) -> Vec3 {
 	return in_vec - 2 * dot(in_vec, normal_vec) * normal_vec;
 }
+
+// ã¸ê‹ 10.2 Snell's Law
+inline auto refract(const Vec3& in_unit_vec, const Vec3& normal_vec, double etain_over_etaout) {
+	auto cos_theta = dot(-in_unit_vec, normal_vec);
+
+	Vec3 vec_out_perp = etain_over_etaout * (in_unit_vec + cos_theta * normal_vec);
+
+	Vec3 vec_out_parallel = -std::sqrt(1.0 - vec_out_perp.length_squared()) * normal_vec;
+
+	return vec_out_perp + vec_out_parallel;
+}

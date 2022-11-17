@@ -19,7 +19,7 @@ public:
 
 		m_viewport_horizontal_vec = { viewport_width, 0, 0 };
 		m_viewport_vertical_vec = { 0, viewport_height, 0 };
-		m_camera_origin = { 0, 0.3, 0.5 };
+		m_camera_origin = { 0, 0.2, 0.7 };
 		m_viewport_lower_left_corner =
 			m_camera_origin - Vec3{ 0, 0, focal_length }
 		- m_viewport_horizontal_vec / 2 - m_viewport_vertical_vec / 2;
