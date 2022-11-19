@@ -8,6 +8,23 @@ class Material {
 public:
 	virtual auto scatter(const Ray& ray_in, const HitRecord& hit_record, Color& out_attenuation, Ray& out_ray_scattered) const
 		-> bool = 0;
+
+	bool m_is_emitting{};
+	Vec3 m_emittingColor{};
+
+};
+
+class Light : public Material {
+public:
+	Light(const Color& emittingColor) {
+		m_emittingColor = emittingColor;
+		m_is_emitting = m_emittingColor.length_squared() > 0;
+	}
+	virtual auto scatter(const Ray& /*ray_in*/, const HitRecord& /*hit_record*/, Color& /*out_attenuation*/, Ray& /*out_ray_scattered*/) const
+		-> bool override {
+		return false;
+	}
+
 };
 
 class Lambertian : public Material {

@@ -7,10 +7,9 @@
 
 
 class Vec3 {
-private:
-	std::array<double, 3> e{ 0, 0, 0 };
 
 public:
+	std::array<double, 3> e{ 0, 0, 0 };
 
 	Vec3() : e{ 0,0,0 } {};
 
