@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <iostream>
+#include <omp.h>
 
 template<typename Base, typename T>
 inline bool instanceof(const T* ptr) {
@@ -62,7 +63,7 @@ int main() {
 	constexpr int image_width{ DEBUG ? 400 : 1280 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = DEBUG ? 100 : 1000;
+	constexpr int n_samples_per_pixel = DEBUG ? 100 : 2000;
 	constexpr int max_refletion = DEBUG ? 10 : 100;
 
 	auto ground_material = std::make_shared<Lambertian>(Color{ 0.5, 0.5, 0.5 });
@@ -114,7 +115,7 @@ int main() {
 			}
 			else if (p < 0.8) {
 				world.add(std::make_shared<Sphere>(center, radius,
-					std::make_shared<Metal>(color, random_from_range(0, 0.5))));
+					std::make_shared<Metal>(color, random_from_range(0.5, 1))));
 			}
 			else if (p < 1) {
 				world.add(std::make_shared<Sphere>(center, radius,
@@ -123,7 +124,8 @@ int main() {
 		}
 	}
 
-	Camera camera{ Point3{5, 1, 5}, Point3{-0.5, 0, -0.5}, {0, 1, 0}, width_over_height_ratio, 30 };
+	Camera camera{ Point3{4.7, 0.8, 5}, Point3{0, 0, -0.5}, {0, 1, 0},
+		width_over_height_ratio, 20 };
 
 
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -131,14 +133,22 @@ int main() {
 	for (auto j{ image_height - 1 }; j >= 0; --j) {
 		std::cerr << "\rScanlines remaining: " << j << '\n' << std::flush;
 		for (auto i{ 0 }; i < image_width; ++i) {
-			Color color{ 0, 0, 0 };
+			double r = 0;
+			double g = 0;
+			double b = 0;
+#pragma omp parallel 
+#pragma omp for reduction(+:r) reduction(+:g) reduction(+:b)
 			for (auto i_sample{ 0 }; i_sample < n_samples_per_pixel; ++i_sample) {
 				auto w{ (static_cast<double>(i) + random_1()) / (static_cast<double>(image_width) - 1) };
 				auto h{ (static_cast<double>(j) + random_1()) / (static_cast<double>(image_height) - 1) };
 				auto ray = camera.get_ray(w, h);
-				color += get_ray_color(ray, world, max_refletion);
+				auto col = get_ray_color(ray, world, max_refletion);
+				r += col.x();
+				g += col.y();
+				b += col.z();
 			}
 
+			Color color{ r, g, b };
 			write_color(std::cout, color / n_samples_per_pixel);
 		}
 	}
