@@ -1,9 +1,9 @@
 [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
-ŠÂ‹«
+ç’°å¢ƒ
 Visual Studio 2022
 
-Às
+å®Ÿè¡Œ
 ```
  .\x64\Release\HelloWorld.exe > image.ppm
 ```
