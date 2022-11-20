@@ -9,6 +9,7 @@
 
 #include "utils.h"
 
+#include <chrono>
 #include <memory>
 #include <iostream>
 #include <omp.h>
@@ -51,24 +52,25 @@ auto get_ray_color(const Ray& ray, const Hittable& world, int n_reflection_avail
 	}
 
 	// 背景
+
 	// y が [-1, 1] なのを t [0, 1]に変換
 	double a = (std::clamp(ray.m_direction.unit().y(), -0.1, 0.15) + 0.1) / 0.25;
-	return ((1.0 - a) * Color { 168, 62, 117 } *0.5 / 256 + a * Color(0, 16, 107) / 256);
+	return ((1.0 - a) * Color { 168, 62, 117 } *0.5 / 256 + a * Color(0, 16, 107) / 256) * 0.2;
 }
 
 int main() {
-	constexpr bool DEBUG = false;
+	constexpr bool DEBUG = true;
 
 	constexpr double width_over_height_ratio{ 16.0 / 9.0 };
-	constexpr int image_width{ DEBUG ? 400 : 1280 };
+	constexpr int image_width{ DEBUG ? 200 : 1280 };
 	constexpr int image_height{ static_cast<int>(image_width / width_over_height_ratio) };
 
-	constexpr int n_samples_per_pixel = DEBUG ? 100 : 2000;
-	constexpr int max_refletion = DEBUG ? 10 : 100;
+	constexpr int n_samples_per_pixel = DEBUG ? 1000 : 6400;
+	constexpr int max_refletion = 100;
 
-	auto ground_material = std::make_shared<Lambertian>(Color{ 0.5, 0.5, 0.5 });
+	auto ground_material = std::make_shared<Metal>(Color{ 1, 1, 1 }*0.8, 0.01);
 	auto light_material = std::make_shared<Light>(Color{ 1, 1, 1 });
-	auto metal_material = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 }, 0.3);
+	auto metal_material = std::make_shared<Metal>(Color{ 0.9, 0.9, 0.9 }, 0.5);
 	auto metal_perfect_material = std::make_shared<Metal>(Color{ 1.0, 1.0, 1.0 });
 	auto glass_material = std::make_shared<Glass>(1.5);
 
@@ -82,7 +84,10 @@ int main() {
 
 	world.add(std::make_shared<Sphere>(Point3{ -0.7, 0.5, -0.5 }, 0.5, metal_perfect_material));
 
-	world.add(std::make_shared<Sphere>(Point3{ 0, -1000, -1 }, 1000, ground_material)); // 地面
+	world.add(std::make_shared<Sphere>(Point3{ 0, -10000, -1 }, 10000, ground_material)); // 地面
+
+	world.add(std::make_shared<Sphere>(Point3{ -10, 10 + 5, 10 }, 10, light_material)); // 月
+
 
 	for (double x = -7; x < 5; x += 0.9) {
 		for (double z = -9; z < 5; z += 0.9) {
@@ -103,7 +108,7 @@ int main() {
 			auto p = random_from_range(0, 1);
 			if (p < 0.1) {
 				world.add(std::make_shared<Sphere>(center, radius,
-					std::make_shared<Lambertian>(color)));
+					std::make_shared<Metal>(color, 0.9)));
 			}
 			else if (p < 0.3) {
 				world.add(std::make_shared<Sphere>(center, radius,
@@ -115,7 +120,7 @@ int main() {
 			}
 			else if (p < 0.8) {
 				world.add(std::make_shared<Sphere>(center, radius,
-					std::make_shared<Metal>(color, random_from_range(0.5, 1))));
+					std::make_shared<Metal>(color, random_from_range(0.1, 0.5))));
 			}
 			else if (p < 1) {
 				world.add(std::make_shared<Sphere>(center, radius,
@@ -125,7 +130,10 @@ int main() {
 	}
 
 	Camera camera{ Point3{4.7, 0.8, 5}, Point3{0, 0, -0.5}, {0, 1, 0},
-		width_over_height_ratio, 20 };
+		width_over_height_ratio, 30 };
+
+	auto start = std::chrono::system_clock::now();
+
 
 
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -154,4 +162,13 @@ int main() {
 	}
 
 	std::cerr << "\nDone.\n";
+
+	// Some computation here
+	auto end = std::chrono::system_clock::now();
+
+	std::chrono::duration<double> elapsed_seconds = end - start;
+
+	std::cerr
+		<< "elapsed time: " << elapsed_seconds.count() / 60 << "min"
+		<< std::endl;
 }
